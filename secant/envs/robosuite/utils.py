@@ -28,7 +28,13 @@ def get_xml_file(xml_path):
 
 
 def _gen_obs_space(obs):
-    return gym.spaces.Box(high=np.inf, low=-np.inf, shape=obs.shape, dtype=obs.dtype)
+    if obs.dtype == np.uint8:
+        high = 255
+        low = 0
+    else:
+        high = np.inf
+        low = -np.inf
+    return gym.spaces.Box(high=high, low=low, shape=obs.shape, dtype=obs.dtype)
 
 
 def get_obs_shape_from_dict(obs_dict):

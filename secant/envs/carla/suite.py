@@ -82,6 +82,23 @@ def load_carla_env(
         world.set_weather(
             apply_custom_weather(world.get_weather(), env_kwargs.get("weather_args"))
         )
+    if env_kwargs.get("weather", "default") == "random":
+        assert (
+            env_kwargs.get("weather_args") is not None
+        )
+        assert isinstance(env_kwargs.get("weather_args"), list)
+        preset_weather = get_weather_presets()
+        for w in env_kwargs.get("weather_args"):
+            assert w in preset_weather
+        # for w in env_kwargs.get("weather_args"):
+        #     assert w in ALL_WEATHERS
+        world.set_weather(
+            getattr(
+                carla.WeatherParameters,
+                snake_to_camel(random.choice(env_kwargs.get("weather_args"))),
+            )
+        )
+
     else:
         assert (
             env_kwargs.get("weather", "default") in get_weather_presets()

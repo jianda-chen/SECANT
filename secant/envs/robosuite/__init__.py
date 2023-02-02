@@ -8,7 +8,7 @@ def is_installed():
 
 
 if is_installed():
-    from .core import make_robosuite, ALL_TASKS
+    from .core import make_robosuite, ALL_TASKS, make_robosuite_random_sample
 
 else:
     _ERROR_MSG = """

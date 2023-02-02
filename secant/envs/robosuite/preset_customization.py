@@ -309,17 +309,23 @@ def get_custom_reset_config(task, mode, scene_id):
     custom_texture = custom_color = custom_camera = custom_light = custom_seed
     custom_reset_config = {}
     if custom_texture:
-        custom_texture_config = copy.deepcopy(PRESET_TEXTURE_CONFIG)
-        custom_texture_config["tex_candidate"] = TASK_TEX_CANDIDATE[task][mode][
-            scene_id
-        ]
-        custom_texture_config["seed"] = custom_texture
+        if mode == "random-domain":
+            custom_texture_config = None
+        else:
+            custom_texture_config = copy.deepcopy(PRESET_TEXTURE_CONFIG)
+            custom_texture_config["tex_candidate"] = TASK_TEX_CANDIDATE[task][mode][
+                scene_id
+            ]
+            custom_texture_config["seed"] = custom_texture
         custom_reset_config["custom_texture"] = custom_texture_config
     if custom_color:
         custom_color_config = copy.deepcopy(PRESET_COLOR_CONFIG)
         custom_color_config["seed"] = custom_color
         custom_reset_config["custom_color"] = custom_color_config
     if custom_camera:
+        # if mode == "random-domain":
+        #     custom_reset_config["custom_camera"] = None
+        # else:
         custom_camera_config = copy.deepcopy(PRESET_CAMERA_CONFIG)
         custom_camera_config["seed"] = custom_camera
         custom_reset_config["custom_camera"] = custom_camera_config
@@ -414,24 +420,28 @@ EVAL_TEX_CANDIDATE = {
 TASK_RANDOM_SEED = {
     "Door": {
         "train": [0, 2, 6, 8, 12, 13, 15, 16, 19, 23, 25],
+        "random-domain": [0, 2, 6, 8, 12, 13, 15, 16, 19, 23, 25],
         "eval-easy": [105, 106, 113, 114, 120, 130, 132, 163, 224, 281],
         "eval-hard": [16, 22, 102, 171, 190, 235, 309, 338, 343, 369],
         "eval-extreme": [26, 29, 31, 100, 112, 148, 229, 275, 291, 369],
     },
     "TwoArmPegInHole": {
         "train": [0, 1, 3, 6, 7, 22, 14, 16, 17, 19, 11],
+        "random-domain": [0, 1, 3, 6, 7, 22, 14, 16, 17, 19, 11],
         "eval-easy": [26, 35, 57, 95, 101, 108, 130, 271, 324, 359],
         "eval-hard": [110, 113, 116, 127, 131, 174, 219, 267, 283, 421],
         "eval-extreme": [11, 101, 108, 122, 132, 145, 166, 327, 349, 429],
     },
     "NutAssemblyRound": {
         "train": [0, 1, 4, 6, 8, 9, 15, 16, 20, 22, 23],
+        "random-domain": [0, 1, 4, 6, 8, 9, 15, 16, 20, 22, 23],
         "eval-easy": [36, 57, 66, 82, 107, 110, 113, 252, 310, 369],
         "eval-hard": [58, 66, 105, 119, 128, 183, 255, 287, 303, 374],
         "eval-extreme": [12, 22, 42, 67, 77, 91, 192, 195, 255, 279],
     },
     "TwoArmLift": {
         "train": [0, 3, 10, 12, 14, 18, 20, 22, 23, 24, 25],
+        "random-domain": [0, 3, 10, 12, 14, 18, 20, 22, 23, 24, 25],
         "eval-easy": [77, 119, 149, 207, 237, 214, 221, 245, 479, 540],
         "eval-hard": [17, 52, 56, 66, 84, 94, 99, 123, 200, 380],
         "eval-extreme": [26, 41, 49, 59, 68, 163, 244, 246, 257, 550],

@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import deque
 
-from .suite import load_carla_env
+from .suite import load_carla_env, snake_to_camel
 from .utils import (
     get_all_vehicles,
     carla_rgb_to_np,
@@ -22,7 +22,7 @@ from .utils import (
     get_stacked_obs,
 )
 from secant.utils import AverageMeter
-from secant.wrappers import VideoRecorder
+# from secant.wrappers import VideoRecorder
 
 ALL_MODALITIES = [
     "rgb",
@@ -217,6 +217,9 @@ class CarlaAdapter(gym.core.Env):
             sim_delta_seconds,
             **self._env_kwargs,
         )
+        self._weather_args = env_kwargs.get("weather_args")
+        self._weather = env_kwargs.get("weather", "default")
+
         self._spawn_ego_and_sensors()
 
     @property
@@ -710,10 +713,19 @@ class CarlaAdapter(gym.core.Env):
                     _depth_queue.queue.clear()
 
         _player_reset_transform = self.world.get_map().get_spawn_points()
-        _player_reset_transform = random.choice(_player_reset_transform)
+        # _player_reset_transform = random.choice(_player_reset_transform)
+        _player_reset_transform = _player_reset_transform[0]
         self._player.set_transform(_player_reset_transform)
         self._player.set_velocity(carla.Vector3D(x=0.0, y=0.0, z=0.0))
         self._player.set_angular_velocity(carla.Vector3D(x=0.0, y=0.0, z=0.0))
+        # resample weather
+        if self._weather == 'random':
+            self.world.set_weather(
+                getattr(
+                    carla.WeatherParameters,
+                    snake_to_camel(random.choice(self._weather_args)),
+                )
+            ) 
         self._tick()
         if self._k is not None:
             _obs = self._get_obs()

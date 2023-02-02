@@ -110,7 +110,7 @@ class RobosuiteAdapter(gym.core.Env):
         self._use_depth = camera_depths
         self._max_episode_steps = episode_length
         self._hard_reset = hard_reset
-        assert mode in ["train", "eval-easy", "eval-hard", "eval-extreme"]
+        assert mode in ["train", "eval-easy", "eval-hard", "eval-extreme", "random-domain"]
         self._mode = mode
         self._scene_id = scene_id
 
@@ -163,6 +163,8 @@ class RobosuiteAdapter(gym.core.Env):
                 or custom_reset_config.get("custom_texture") is not None
             ):
                 self.reset_xml_next = True
+            else:
+                self.reset_xml_next = False
         else:
             self._reset_config = dict.fromkeys(
                 [
@@ -321,6 +323,16 @@ class RobosuiteAdapter(gym.core.Env):
                 custom_camera=self._reset_config.get("custom_camera", None),
                 custom_light=self._reset_config.get("custom_light", None),
             )
+            for modder_key in ["color", "camera", "light"]:
+                modder = self.modders[modder_key]
+                if modder:
+                    seed = self.modder_seeds[modder_key]
+                    if seed is None:
+                        random_state = np.random.mtrand._rand
+                    else:
+                        random_state = np.random.RandomState(seed)
+                    modder.random_state = random_state
+                    modder.randomize()
         else:
             self._initialize_modders(
                 custom_color=custom_color,
@@ -328,16 +340,10 @@ class RobosuiteAdapter(gym.core.Env):
                 custom_light=custom_light,
             )
 
-        for modder_key in ["color", "camera", "light"]:
-            modder = self.modders[modder_key]
-            if modder:
-                seed = self.modder_seeds[modder_key]
-                if seed is None:
-                    random_state = np.random.mtrand._rand
-                else:
-                    random_state = np.random.RandomState(seed)
-                modder.random_state = random_state
-                modder.randomize()
+            for modder_key in ["color", "camera", "light"]:
+                modder = self.modders[modder_key]
+                if modder:
+                    modder.randomize()
         return self._reformat_obs(self.env._get_observation())
 
     def _reset_from_xml(self, xml_string):

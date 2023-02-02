@@ -11,6 +11,8 @@ class SingleModality(gym.ObservationWrapper):
             self.env.observation_space, gym.spaces.Dict
         ):
             self.observation_space = self.env.observation_space[modality]
+        if hasattr(env, "_max_episode_steps"):
+            self._max_episode_steps = env._max_episode_steps
 
     def observation(self, obs):
         assert isinstance(obs, collections.abc.Mapping)

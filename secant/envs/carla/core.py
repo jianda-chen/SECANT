@@ -2,7 +2,7 @@ import time
 
 from typing import Optional, List
 from .adapter import CarlaAdapter
-from secant.wrappers import TimeLimit
+from secant.wrappers import TimeLimit, SingleModality, FrameStack
 
 from carla import Client
 
@@ -137,7 +137,7 @@ def _make_carla(
     assert isinstance(weather, str)
     env_kwargs["weather"] = weather
 
-    assert isinstance(weather_args, dict) or weather_args is None
+    assert isinstance(weather_args, dict) or weather_args is None or isinstance(weather_args, list)
     env_kwargs["weather_args"] = weather_args
 
     assert vehicle_color is None or isinstance(vehicle_color, list)
@@ -168,7 +168,7 @@ def _make_carla(
         height=image_height,
         width=image_width,
         action_repeat=action_repeat,
-        frame_stack=frame_stack,
+        frame_stack=None,
         channels_first=channels_first,
         **env_kwargs
     )
@@ -177,7 +177,10 @@ def _make_carla(
     if episode_length is not None:
         max_episode_steps = (episode_length + action_repeat - 1) // action_repeat
         env = TimeLimit(env, max_episode_steps=max_episode_steps)
-
+    if len(modalities) == 1:
+        env = SingleModality(env, modalities[0])
+    if frame_stack and frame_stack > 0:
+        env = FrameStack(env, frame_stack)
     assert env.action_space.low.min() >= -1
     assert env.action_space.high.max() <= 1
     return env
